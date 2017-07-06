@@ -60,4 +60,23 @@ public class DBManager {
 			return (Integer) null;
 		}
 	}
+	
+	public List<String> task(){
+		try (Statement st = conn.createStatement()) {
+			List<String> task_list = new ArrayList<String>();
+			st.execute("select * from tasks;");
+			ResultSet rs = st.getResultSet();
+			while (rs.next()) {
+				task_list.add(rs.getString("task_name"));
+			}
+			if (!task_list.isEmpty()) {
+				return task_list;
+			} else {
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

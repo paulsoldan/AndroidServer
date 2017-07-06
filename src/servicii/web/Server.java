@@ -40,8 +40,14 @@ public class Server {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public int checkLogin(@PathParam("username") String username, @PathParam("password") String password) {
-		System.out.println(username+" "+password);
 		return DBManager.getInstance().testLogin(username, password);
+	}
+	@Path("/tasks")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getTask(){
+		String tasks=DBManager.getInstance().task().toString();
+		return tasks;
 	}
 
 }
