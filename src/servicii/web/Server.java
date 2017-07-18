@@ -27,5 +27,28 @@ public class Server {
 		String tasks=DBManager.getInstance().task().toString();
 		return tasks;
 	}
-
+	@Path("/checkIn/{username}/{hour}/{task}")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String checkInInsert(@PathParam("username") String username, @PathParam("hour") String hour, @PathParam("task") String task){
+		System.out.println(username);
+		System.out.println(hour);
+		System.out.println(task);
+		return DBManager.getInstance().checkIn(username,hour,task);
+	}
+	@Path("/checkOut/{username}/{hour}")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String checkInInsert(@PathParam("username") String username, @PathParam("hour") String hour){
+		System.out.println(username);
+		System.out.println(hour);
+		return DBManager.getInstance().checkOut(username,hour);
+	}
+	@Path("/myReports/{username}")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String myReports(@PathParam("username") String username){
+		System.out.println(username);
+		return DBManager.getInstance().status(username);
+	}
 }

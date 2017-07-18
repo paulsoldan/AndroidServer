@@ -79,4 +79,83 @@ public class DBManager {
 			return null;
 		}
 	}
+	public String checkIn(String username, String hour, String task) {
+		try (Statement st = conn.createStatement()) {
+			String status="ok";
+			st.execute("insert into checkIn values((select id from users where username=\""+username+'"'+"),"+'"'+hour+'"'+","+'"'+task+'"'+");");
+			return status;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public String checkOut(String username, String hour) {
+		try (Statement st = conn.createStatement()) {
+			String status="ok";
+			String checkIn = "00:00";
+			st.execute("insert into checkOut values((select id from users where username=\""+username+'"'+"),"+'"'+hour+'"'+");");
+			st.execute("select * from checkIn where user_id_in = (select id from users where username=\""+username+'"'+");");
+			ResultSet rs = st.getResultSet();
+			while (rs.next()) {
+				checkIn=rs.getString("checkIn");
+			}
+			String[] in_list = checkIn.split(":");
+			String[] out_list = hour.split(":");
+			int h_in=Integer.parseInt(in_list[0]);
+			int m_in=Integer.parseInt(in_list[1]);
+			int h_out=Integer.parseInt(out_list[0]);
+			int m_out=Integer.parseInt(out_list[1]);
+			int h_final = 0, m_final = 0;
+			if(m_out-m_in<0){
+				m_final=(60+m_out)-m_in;
+				h_out=h_out-1;
+			}
+			else{
+				m_final=m_out-m_in;
+			}
+			h_final=h_out-h_in;
+			String hw="00:00";
+			st.execute("select * from hours_work where hw_user_id = (select id from users where username=\""+username+'"'+");");
+			ResultSet rst = st.getResultSet();
+			while (rst.next()) {
+				hw=rst.getString("hw");
+			}
+			if(!hw.equals("00:00")){
+				h_in=h_final;
+				m_in=m_final;
+				String[] hw_list = hw.split(":");
+				int h_w=Integer.parseInt(hw_list[0]);
+				int m_w=Integer.parseInt(hw_list[1]);
+				if(m_in+m_w>=60){
+					m_final=(m_in+m_w)-60;
+					h_in=h_in+1;
+				}
+				else{
+					m_final=m_in+m_w;
+				}
+				h_final=h_in+h_w;
+			}
+			String hour_final = "";
+			hour_final = "" + h_final + ":" + m_final;
+			st.execute("update hours_work set hw=\""+hour_final+'"'+" where hw_user_id = "+"(select id from users where username=\""+username+'"'+");");
+			return status;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public String status(String username) {
+		try (Statement st = conn.createStatement()) {
+			String hours="00:00";
+			st.execute("select * from hours_work where hw_user_id = (select id from users where username=\""+username+'"'+");");
+			ResultSet rs = st.getResultSet();
+			while (rs.next()) {
+				hours=rs.getString("hw");
+			}
+			return hours;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }
