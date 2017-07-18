@@ -93,11 +93,13 @@ public class DBManager {
 		try (Statement st = conn.createStatement()) {
 			String status="ok";
 			String checkIn = "00:00";
+			int user_id=-1;
 			st.execute("insert into checkOut values((select id from users where username=\""+username+'"'+"),"+'"'+hour+'"'+");");
 			st.execute("select * from checkIn where user_id_in = (select id from users where username=\""+username+'"'+");");
 			ResultSet rs = st.getResultSet();
 			while (rs.next()) {
 				checkIn=rs.getString("checkIn");
+				user_id=rs.getInt("user_id_in");
 			}
 			String[] in_list = checkIn.split(":");
 			String[] out_list = hour.split(":");
@@ -138,6 +140,8 @@ public class DBManager {
 			String hour_final = "";
 			hour_final = "" + h_final + ":" + m_final;
 			st.execute("update hours_work set hw=\""+hour_final+'"'+" where hw_user_id = "+"(select id from users where username=\""+username+'"'+");");
+			st.execute("delete from checkIn where user_id_in='" + user_id + "';");
+			st.execute("delete from checkOut where user_id_out='" + user_id + "';");
 			return status;
 		} catch (SQLException e) {
 			e.printStackTrace();
