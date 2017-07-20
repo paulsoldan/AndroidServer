@@ -150,6 +150,24 @@ public class DBManager {
 			st.execute("update hours_work set hw=\""+hour_final+'"'+" where hw_user_id = "+"(select id from users where username=\""+username+'"'+");");
 			st.execute("delete from checkIn where user_id_in='" + user_id + "';");
 			st.execute("delete from checkOut where user_id_out='" + user_id + "';");
+			st.execute("select * from hours_work where hw_user_id = (select id from users where username=\""+username+'"'+");");
+			rst = st.getResultSet();
+			while (rst.next()) {
+				hw=rst.getString("hw");
+			}
+			double salary_this_month = 0;
+			st.execute("select * from salary where user_id = (select id from users where username=\""+username+'"'+");");
+			rs = st.getResultSet();
+			while (rs.next()) {
+				salary_this_month=rs.getDouble("salary_this_month");
+			}
+			double salary_this_month_per_minute=salary_this_month/60;
+            String[] splitHours = hw.split(":");
+            h_in=Integer.parseInt(splitHours[0]);
+            m_in=Integer.parseInt(splitHours[1]);
+            int totalMinutes=h_in*60+m_in;
+            double salary=totalMinutes*salary_this_month_per_minute;
+            st.execute("update salary set earnings=\""+salary+'"'+" where user_id = "+"(select id from users where username=\""+username+'"'+");");
 			return status;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -161,6 +179,8 @@ public class DBManager {
 			List<String> reports=new ArrayList<String>();
 			String hours = "00:00";
 			int days = 0;
+			double salary_this_month = 0;
+			double earnings = 0;
 			st.execute("select * from hours_work where hw_user_id = (select id from users where username=\""+username+'"'+");");
 			ResultSet rs = st.getResultSet();
 			while (rs.next()) {
@@ -173,6 +193,14 @@ public class DBManager {
 				days=rs.getInt("days");
 			}
 			reports.add(""+days);
+			st.execute("select * from salary where user_id = (select id from users where username=\""+username+'"'+");");
+			rs = st.getResultSet();
+			while (rs.next()) {
+				salary_this_month=rs.getDouble("salary_this_month");
+				earnings=rs.getDouble("earnings");
+			}
+			reports.add(""+salary_this_month);
+			reports.add(""+earnings);
 			return reports;
 		} catch (SQLException e) {
 			e.printStackTrace();
