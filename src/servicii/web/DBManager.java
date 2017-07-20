@@ -82,7 +82,15 @@ public class DBManager {
 	public String checkIn(String username, String hour, String task) {
 		try (Statement st = conn.createStatement()) {
 			String status="ok";
+			int days=0;
 			st.execute("insert into checkIn values((select id from users where username=\""+username+'"'+"),"+'"'+hour+'"'+","+'"'+task+'"'+");");
+			st.execute("select * from days_worked where user_id = (select id from users where username=\""+username+'"'+");");
+			ResultSet rs = st.getResultSet();
+			while (rs.next()) {
+				days=rs.getInt("days");
+			}
+			days+=1;
+			st.execute("update days_worked set days=\""+days+'"'+" where user_id = (select id from users where username=\""+username+'"'+");");
 			return status;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -148,15 +156,24 @@ public class DBManager {
 			return null;
 		}
 	}
-	public String status(String username) {
+	public List<String> status(String username) {
 		try (Statement st = conn.createStatement()) {
-			String hours="00:00";
+			List<String> reports=new ArrayList<String>();
+			String hours = "00:00";
+			int days = 0;
 			st.execute("select * from hours_work where hw_user_id = (select id from users where username=\""+username+'"'+");");
 			ResultSet rs = st.getResultSet();
 			while (rs.next()) {
 				hours=rs.getString("hw");
 			}
-			return hours;
+			reports.add(hours);
+			st.execute("select * from days_worked where user_id = (select id from users where username=\""+username+'"'+");");
+			rs = st.getResultSet();
+			while (rs.next()) {
+				days=rs.getInt("days");
+			}
+			reports.add(""+days);
+			return reports;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;

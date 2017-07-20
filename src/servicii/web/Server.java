@@ -49,6 +49,6 @@ public class Server {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String myReports(@PathParam("username") String username){
 		System.out.println(username);
-		return DBManager.getInstance().status(username);
+		return DBManager.getInstance().status(username).toString();
 	}
 }
